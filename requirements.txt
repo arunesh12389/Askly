@@ -1,4 +1,7 @@
-streamlit
+
+--index-url https://download.pytorch.org/whl/cpu
+
+torch
 openai
 PyMuPDF
 tqdm
@@ -10,10 +13,9 @@ sentence-transformers==2.2.2
 transformers==4.33.2
 python-dotenv
 pydantic
-fpdf
-pyperclip
 numpy==1.25.2
 huggingface-hub<=0.19.4
+
 fastapi
 uvicorn[standard]
 requests
