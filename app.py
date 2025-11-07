@@ -152,9 +152,9 @@ with st.container(border=True):
             st.session_state["is_generating"] = True
             with st.spinner("⏳ Generating answer..."):
                 try:
-                    llm = ChatGroq(api_key=GROQ_API_KEY, model="llama-3.3-70b-versatile", temperature=0)
+                    llm = ChatGroq(api_key=GROQ_API_KEY.get_secret_value(), model="llama-3.3-70b-versatile", temperature=0)
                     retriever = st.session_state["vector_store"].as_retriever()
-                    
+
                     qa_chain = create_retrieval_chain(retriever, llm)
 
                     t0 = time.perf_counter()
