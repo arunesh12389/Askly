@@ -13,3 +13,4 @@ pydantic
 fpdf
 pyperclip
 numpy==1.25.2
+huggingface-hub<=0.19.4
