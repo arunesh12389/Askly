@@ -3,6 +3,7 @@ import os
 import time
 import requests
 import tempfile
+import logging 
 from fastapi import FastAPI
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -26,7 +27,7 @@ app = FastAPI()
 # --- Define the data models for API requests ---
 class AskRequest(BaseModel):
     question: str
-    pdf_url: str  # This is the URL from Cloudinary (from your MERN app)
+    pdf_url: str
 
 # --- Re-use your chain creation logic from app.py ---
 def create_retrieval_chain(retriever, llm):
@@ -45,6 +46,7 @@ def ask_ai_endpoint(request: AskRequest):
     This endpoint downloads a PDF from a URL, processes it,
     and answers a question about it.
     """
+    tmp_pdf_path = None # Define outside try block for cleanup
     try:
         # 1. Download the PDF from the Cloudinary URL
         pdf_response = requests.get(request.pdf_url)
@@ -73,7 +75,8 @@ def ask_ai_endpoint(request: AskRequest):
         answer = response.get("result") if isinstance(response, dict) else str(response)
         
         # 6. Clean up the temporary file
-        os.remove(tmp_pdf_path)
+        if tmp_pdf_path and os.path.exists(tmp_pdf_path):
+            os.remove(tmp_pdf_path)
 
         # 7. Return the final JSON response to your MERN app
         return {
@@ -83,8 +86,11 @@ def ask_ai_endpoint(request: AskRequest):
         }
 
     except Exception as e:
+        # Explicitly log the full traceback to Heroku's logs
+        logging.exception("An error occurred in /ask-ai endpoint:")
+        
         # Clean up the file even if an error occurs
-        if 'tmp_pdf_path' in locals() and os.path.exists(tmp_pdf_path):
+        if tmp_pdf_path and os.path.exists(tmp_pdf_path):
             os.remove(tmp_pdf_path)
         
         # Return an error message
