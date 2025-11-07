@@ -35,7 +35,9 @@ def create_vector_store(chunks, model_name="sentence-transformers/all-MiniLM-L6-
     """Creates a FAISS vector store from text chunks."""
     if not chunks:
         raise ValueError("No text chunks provided for vector store creation.")
-    
+
+    # force the SentenceTransformer object
+    from langchain_community.embeddings import HuggingFaceEmbeddings
     embeddings = HuggingFaceEmbeddings(model_name=model_name)
     vector_store = FAISS.from_texts(chunks, embedding=embeddings)
     return vector_store
