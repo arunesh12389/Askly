@@ -3,7 +3,7 @@ import os
 import time
 import requests
 import tempfile
-import logging 
+import logging
 from fastapi import FastAPI
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -95,6 +95,38 @@ def ask_ai_endpoint(request: AskRequest):
         
         # Return an error message
         return {"success": False, "error": str(e)}
+
+# --- NEW DEBUGGING ENDPOINT ---
+@app.get("/test-connection")
+def test_groq_connection():
+    """
+    Tries to connect to the Groq API /models endpoint
+    to see if the Heroku dyno can reach it.
+    """
+    try:
+        logging.info("Attempting to connect to Groq API...")
+        response = requests.get(
+            "https://api.groq.com/openai/v1/models",
+            headers={
+                "Authorization": f"Bearer {api_key}"
+            }
+        )
+        
+        # Check if the request was successful (even if it's an auth error)
+        if response.status_code == 200:
+            return {"success": True, "message": "Successfully connected to Groq and got models.", "data": response.json()}
+        elif response.status_code == 401:
+             return {"success": True, "message": "Connection to Groq successful, but API key is invalid."}
+        else:
+            return {"success": False, "message": f"Connected to Groq, but got an error.", "status_code": response.status_code, "response": response.text}
+
+    except requests.exceptions.ConnectionError as e:
+        logging.exception("Connection test FAILED:")
+        # This is the error we suspect is happening
+        return {"success": False, "message": "A requests.exceptions.ConnectionError occurred.", "error": str(e)}
+    except Exception as e:
+        logging.exception("An unknown error occurred during connection test:")
+        return {"success": False, "message": "An unknown error occurred.", "error": str(e)}
 
 # Test endpoint
 @app.get("/")
