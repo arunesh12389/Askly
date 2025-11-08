@@ -5,6 +5,7 @@ import requests
 import tempfile
 import logging
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware 
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
@@ -23,6 +24,18 @@ if not api_key:
 
 # --- Initialize the FastAPI app ---
 app = FastAPI()
+# --- Set up CORS middleware to allow requests from your MERN app ---
+origins = [
+    "*"  # Allows all origins
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],  
+    allow_headers=["*"], 
+)
 
 # --- Define the data models for API requests ---
 class AskRequest(BaseModel):
